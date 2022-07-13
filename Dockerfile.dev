@@ -1,0 +1,14 @@
+FROM node:14
+
+WORKDIR /app
+
+COPY ./next-counter-app/package.json ./
+COPY ./next-counter-app/yarn.lock ./
+
+RUN yarn
+
+COPY ./next-counter-app/ ./
+
+EXPOSE 3000
+
+CMD ["yarn", "dev"]
