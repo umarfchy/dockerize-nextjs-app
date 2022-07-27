@@ -6,7 +6,7 @@ export default function Index() {
   const increase = () => setCount((prevCount) => prevCount + 1);
   const decrease = () => setCount((prevCount) => prevCount - 1);
   const reset = () => setCount(0);
-
+  const hiddenEnvValue = process.env.NEXT_PUBLIC_HIDDEN_VALUE;
   return (
     <>
       <h3>Count: {count}</h3>
@@ -19,6 +19,7 @@ export default function Index() {
           -
         </button>
       </>
+      <p>The hidden value from dot env file is {hiddenEnvValue}</p>
     </>
   );
 }
