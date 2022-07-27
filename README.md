@@ -1,34 +1,55 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+> **Note**
+> This is a demo on how you can containerize a nextjs application at its bare basic. If you'd like to do production grade deployment, I recommend using vercel's official guide.
 
-## Getting Started
+> **Warning**
+> This is a demo on how you can containerize a nextjs application at its bare basic. If you'd like to do production grade deployment, I recommend using vercel's official guide.
 
-First, run the development server:
+# Multi-stage
 
-```bash
-npm run dev
-# or
-yarn dev
-```
+# Stage 1: Installing dependencies
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+FROM node:16-alpine AS deps
+RUN apk add --no-cache libc6-compat
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+WORKDIR /app
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+# Copying package.json and yarn.lock and installing node modules
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+# This helps caching the modules
 
-## Learn More
+COPY ./package.json .
+COPY ./yarn.lock .
+RUN yarn install --frozen-lockfile --prod
 
-To learn more about Next.js, take a look at the following resources:
+# Stage 2: Building source code
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+FROM node:16-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+# This will do the trick, use the corresponding env file for each environment.
 
-## Deploy on Vercel
+# COPY .env.production.sample .env.production
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+RUN yarn build
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+# 3. Setting up the production image
+
+FROM node:16-alpine
+WORKDIR /app
+ENV NODE_ENV=production
+
+# You only need to copy next.config.js if you are NOT using the default configuration
+
+# COPY --from=builder /app/next.config.js ./
+
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+
+EXPOSE 3000
+ENV PORT 3000
+
+CMD ["node", "server.js"]
