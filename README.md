@@ -1,8 +1,11 @@
 <!-- > **Note**
 > Notes can be added here-->
 
+
 > **Warning**
 > This is a demo on how you can containerize a nextjs application at its bare basic. I'd recommend the [official guide](https://nextjs.org/docs/deployment) for the production grade deployment.
+
+
 
 To containerize a nextjs application, a multi-stage docker will be employed with three stages. Before starting the process we need to make sure that the `next.config.js` file has the following property `output: "standalone"`. It will be explained on stage 2 why would we need this. Let's start by creating the `Dockerfile`.
 
