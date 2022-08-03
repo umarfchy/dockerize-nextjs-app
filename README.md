@@ -1,6 +1,7 @@
 <!-- > **Note**
 > Notes can be added here-->
 
+# Containerize a Nextjs Application
 
 > **Warning**
 > This is a demo on how you can containerize a nextjs application at its bare basic. I'd recommend the [official guide](https://nextjs.org/docs/deployment) for the production grade deployment.
